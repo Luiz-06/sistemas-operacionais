@@ -56,7 +56,6 @@ class BankersAlgorithm {
         return [true, safeSequence];
     }
 
-    /*
     requestResources(processId: number, request: number[]): boolean {
         if (request.some((req, j) => req > this.needMatrix[processId][j])) {
             throw new Error("Request exceeds maximum need");
@@ -86,7 +85,6 @@ class BankersAlgorithm {
 
         return true;
     }
-        */
 }
 
 
@@ -119,7 +117,6 @@ function main() {
     console.log(`Is Safe State: ${isSafe}`);
     console.log(`Safe Sequence: ${safeSequence}`);
 
-    /*
     const testRequest: number[] = [1, 0, 2];
     console.log("\nTesting Resource Request:");
     const requestResult = banker.requestResources(0, testRequest);
@@ -149,7 +146,6 @@ function main() {
     const [isSafeUnsafe, safeSequenceUnsafe] = bankerUnsafe.isSafeState();
     console.log(`Is Safe State: ${isSafeUnsafe}`);
     console.log(`Safe Sequence: ${safeSequenceUnsafe}`);
-    */
 }
 
 main();
