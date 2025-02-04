@@ -1,151 +1,72 @@
-class BankersAlgorithm {
-    numProcesses: number;
-    numResources: number;
-    maxMatrix: number[][];
-    allocationMatrix: number[][];
-    availableResources: number[];
-    needMatrix: number[][];
+#include <stdio.h>
 
-    constructor(numProcesses: number, numResources: number, maxMatrix: number[][], allocationMatrix: number[][], availableResources: number[]) {
-        this.numProcesses = numProcesses;
-        this.numResources = numResources;
-        this.maxMatrix = maxMatrix;
-        this.allocationMatrix = allocationMatrix;
-        this.availableResources = availableResources;
+typedef struct {
+    int recursosProcesso1[4];
+    int recursosProcesso2[4];
+    int recursosProcesso3[4];
+} AlocacaoRequisicao;
 
-        this.needMatrix = this.maxMatrix.map((maxRow, i) =>
-            maxRow.map((maxVal, j) => maxVal - this.allocationMatrix[i][j])
-        );
+int main() {
+    int recursosTotais[] = {4, 2, 3, 1};
+    int recursosDisponiveis[4];
+
+    AlocacaoRequisicao alocacoes = {
+        {0, 0, 1, 0},
+        {2, 0, 0, 1}, 
+        {0, 1, 2, 0}  
+    };
+
+    AlocacaoRequisicao requisicoes = {
+        {2, 0, 0, 1},
+        {1, 0, 1, 0}, 
+        {2, 1, 0, 0}  
+    };
+
+    int processosFinalizados[3] = {0, 0, 0};
+    int quantidadeProcessosFinalizados = 0;
+
+    for (int i = 0; i < 4; i++) {
+        recursosDisponiveis[i] = recursosTotais[i] - (alocacoes.recursosProcesso1[i] + alocacoes.recursosProcesso2[i] + alocacoes.recursosProcesso3[i]);
     }
-    
-    isSafeState(): [boolean, number[]] {
-        const work = [...this.availableResources];
-        const finish = Array(this.numProcesses).fill(false);
-        const safeSequence: number[] = [];
-    
-        for (let i = 0; i < this.numProcesses; i++) {
-            let found = false;
-    
-            for (let p = 0; p < this.numProcesses; p++) {
-                let canExecute = true;
 
-                for (let j = 0; j < this.numResources; j++) {
-                    if (this.needMatrix[p][j] > work[j]) {
-                        canExecute = false;
+    while (quantidadeProcessosFinalizados < 3) {
+        int processoExecutado = 0;
+
+        for (int p = 0; p < 3; p++) {
+            if (processosFinalizados[p] == 0) {
+                int podeExecutar = 1;
+
+                for (int r = 0; r < 4; r++) {
+                    if ((p == 0 && requisicoes.recursosProcesso1[r] > recursosDisponiveis[r]) ||
+                        (p == 1 && requisicoes.recursosProcesso2[r] > recursosDisponiveis[r]) ||
+                        (p == 2 && requisicoes.recursosProcesso3[r] > recursosDisponiveis[r])) {
+                        podeExecutar = 0;
                         break;
                     }
                 }
-    
-                if (!finish[p] && canExecute) {
-                    for (let j = 0; j < this.numResources; j++) {
-                        work[j] += this.allocationMatrix[p][j];
+
+                if (podeExecutar) {
+                    for (int r = 0; r < 4; r++) {
+                        if (p == 0)
+                            recursosDisponiveis[r] += alocacoes.recursosProcesso1[r];
+                        if (p == 1)
+                            recursosDisponiveis[r] += alocacoes.recursosProcesso2[r];
+                        if (p == 2)
+                            recursosDisponiveis[r] += alocacoes.recursosProcesso3[r];
                     }
-    
-                    finish[p] = true;
-                    safeSequence.push(p);
-                    found = true;
-                    break;
+                    processosFinalizados[p] = 1;
+                    quantidadeProcessosFinalizados++;
+                    processoExecutado = 1;
                 }
             }
-    
-            if (!found) {
-                return [false, []];
-            }
         }
-    
-        return [true, safeSequence];
+
+        if (!processoExecutado) {
+            printf("Deadlock detectado! Não é possível continuar a execução.\n");
+            return 1;
+        }
     }
 
-    requestResources(processId: number, request: number[]): boolean {
-        if (request.some((req, j) => req > this.needMatrix[processId][j])) {
-            throw new Error("Request exceeds maximum need");
-        }
-
-        if (request.some((req, j) => req > this.availableResources[j])) {
-            return false;
-        }
-
-        for (let j = 0; j < this.numResources; j++) {
-            this.availableResources[j] -= request[j];
-            this.allocationMatrix[processId][j] += request[j];
-            this.needMatrix[processId][j] -= request[j];
-        }
-
-
-        const [isSafe] = this.isSafeState();
-
-        if (!isSafe) {
-            for (let j = 0; j < this.numResources; j++) {
-                this.availableResources[j] += request[j];
-                this.allocationMatrix[processId][j] -= request[j];
-                this.needMatrix[processId][j] += request[j];
-            }
-            return false;
-        }
-
-        return true;
-    }
+    printf("Nenhum deadlock detectado. O sistema está em um estado seguro.\n");
+    return 0;
 }
-
-
-function main() {
-    console.log("Test Case 1: Safe State Scenario");
-    const numProcesses = 5;
-    const numResources = 3;
-
-    const maxMatrix: number[][] = [
-        [7, 5, 3],
-        [3, 2, 2],
-        [9, 0, 2],
-        [2, 2, 2],
-        [4, 3, 3]
-    ];
-
-    const allocationMatrix: number[][] = [
-        [0, 1, 0],
-        [2, 0, 0],
-        [3, 0, 2],
-        [2, 1, 1],
-        [0, 0, 2]
-    ];
-
-    const availableResources: number[] = [3, 3, 2];
-
-    const banker = new BankersAlgorithm(numProcesses, numResources, maxMatrix, allocationMatrix, availableResources);
-
-    const [isSafe, safeSequence] = banker.isSafeState();
-    console.log(`Is Safe State: ${isSafe}`);
-    console.log(`Safe Sequence: ${safeSequence}`);
-
-    const testRequest: number[] = [1, 0, 2];
-    console.log("\nTesting Resource Request:");
-    const requestResult = banker.requestResources(0, testRequest);
-    console.log(`Request Granted: ${requestResult}`);
-
-    console.log("\nTest Case 2: Unsafe State Scenario");
-    const maxMatrixUnsafe: number[][] = [
-        [6, 4, 3],
-        [3, 2, 2],
-        [9, 0, 2],
-        [2, 2, 2],
-        [4, 3, 3]
-    ];
-
-    const allocationMatrixUnsafe: number[][] = [
-        [0, 1, 0],
-        [3, 0, 2],
-        [3, 0, 2],
-        [2, 1, 1],
-        [0, 0, 2]
-    ];
-
-    const availableResourcesUnsafe: number[] = [1, 1, 0];
-
-    const bankerUnsafe = new BankersAlgorithm(numProcesses, numResources, maxMatrixUnsafe, allocationMatrixUnsafe, availableResourcesUnsafe);
-
-    const [isSafeUnsafe, safeSequenceUnsafe] = bankerUnsafe.isSafeState();
-    console.log(`Is Safe State: ${isSafeUnsafe}`);
-    console.log(`Safe Sequence: ${safeSequenceUnsafe}`);
-}
-
-main();
