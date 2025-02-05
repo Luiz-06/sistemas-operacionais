@@ -1,8 +1,10 @@
 #include <stdio.h>
 
 int main() {
+    /*
     int quantidadeDeProcessos = 3;
     int quantidadeDeRecursos  = 4; 
+    */
     
     int recursosTotais[] = {4, 2, 3, 1};
     
