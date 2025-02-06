@@ -89,11 +89,11 @@ void round_robin(Processo processos[], int num_processos, int quantum, int troca
         somatorio_vida += tempo_vida[i];
     }
 
-    int tempoMedioDeVida = somatorio_vida / num_processos;
-    int tempoMedioDeEspera = somatorio_espera / num_processos;
+    float tempoMedioDeVida = somatorio_vida / num_processos;
+    float tempoMedioDeEspera = somatorio_espera / num_processos;
 
-    printf("\nTm_espera: %d\n", tempoMedioDeEspera);
-    printf("Tm_vida: %d\n", tempoMedioDeVida);
+    printf("\nTm_espera: %.2f\n", tempoMedioDeEspera);
+    printf("Tm_vida: %.2f\n", tempoMedioDeVida);
     printf("Tempo total: %d\n", tempo_total);
 }
 
