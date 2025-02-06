@@ -21,16 +21,17 @@ void ordenar_por_chegada(Processo processos[], int num_processos) {
     }
 }
 
-void round_robin(Processo processos[], int num_processos, int quantum, int troca_contexto) {
-    Processo fila[num_processos]; 
+int verificar_e_adicionar_troca_contexto(Processo fila[], int fila_inicio, int fila_fim, int tempo_total, int troca_contexto) {
+    if (fila_inicio + 1 < fila_fim) { 
+        return troca_contexto;
+    }
+    return 0;
+}
 
-    int tempo_espera[num_processos];  
+void round_robin(Processo processos[], int num_processos, int quantum, int troca_contexto) {
     int tempo_vida[num_processos];
 
     for (int i = 0; i < num_processos; i++) {
-        fila[i] = processos[i];
-        fila[i].tempo_inicio = -1;  
-        tempo_espera[i] = 0;
         tempo_vida[i] = 0; 
     }
 
@@ -40,7 +41,7 @@ void round_robin(Processo processos[], int num_processos, int quantum, int troca
     int total_trocas = 0;
 
     while (fila_inicio < fila_fim) {
-        Processo* processo = &fila[fila_inicio];
+        Processo* processo = &processos[fila_inicio];
 
         if (tempo_total < processo->tempo_chegada) {
             tempo_total = processo->tempo_chegada;
@@ -53,10 +54,12 @@ void round_robin(Processo processos[], int num_processos, int quantum, int troca
         if (processo->tempo_restante > quantum) {
             tempo_total += quantum;
             processo->tempo_restante -= quantum;
-            fila_inicio++;
-            fila[fila_fim++] = *processo;
-            tempo_total += troca_contexto;
+            
+            tempo_total += verificar_e_adicionar_troca_contexto(processos, fila_inicio, fila_fim, tempo_total, troca_contexto);
+            
+            fila_inicio++;  
             total_trocas++;
+            processos[fila_fim++] = *processo; 
         } else {
             tempo_total += processo->tempo_restante;
             processo->tempo_restante = 0;
@@ -64,37 +67,37 @@ void round_robin(Processo processos[], int num_processos, int quantum, int troca
 
             tempo_vida[processo->id - 1] = processo->tempo_termino - processo->tempo_chegada;
 
-            printf("Processo %d terminou | Tempo de vida: %d | Tempo de espera: ??\n",
-                processo->id, tempo_vida[processo->id - 1]);
+            printf("T_vida(t%d): %d\n", processo->id, tempo_vida[processo->id - 1]);
 
-            fila_inicio++;
-            tempo_total += troca_contexto;
+            tempo_total += verificar_e_adicionar_troca_contexto(processos, fila_inicio, fila_fim, tempo_total, troca_contexto);
+            
+            fila_inicio++;  
             total_trocas++;
         }
     }
 
-    printf("Tempo total: %d\n", tempo_total - troca_contexto);
-    printf("Total de trocas de contexto: %d\n", total_trocas);
-    
-    int soma_tempo_vida = 0;
+    int somatorio = 0;
 
-    for (int i = 0; i < num_processos; i++) {
-        soma_tempo_vida += tempo_vida[i];
+    for (int i = 0; i < num_processos; i ++) {
+        somatorio += tempo_vida[i];
     }
 
-    float tempo_medio_vida = (float)soma_tempo_vida / num_processos;
+    int tempoMedioDeVida = somatorio / num_processos;
 
-    printf("Tempo médio de vida: %.2f\n", tempo_medio_vida);
+    printf("\nTm_vida: %d\n", tempoMedioDeVida);
+    printf("Tempo total: %d\n", tempo_total);
 }
 
 int main() {
     Processo processos[] = {
-        {1, 10, 10, -1, 0, 3},  
-        {2, 10, 10, -1, 0, 1}   
+        {1, 10, 10, -1, 0, 5},  
+        {2, 30, 30, -1, 0, 15},
+        {3, 20, 20, -1, 0, 10},
+        {4, 40, 40, -1, 0, 0} 
     };
 
     int num_processos = sizeof(processos) / sizeof(processos[0]);
-    int quantum = 5;
+    int quantum = 15;
     int troca_contexto = 4;
 
     ordenar_por_chegada(processos, num_processos);
