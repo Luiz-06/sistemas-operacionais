@@ -89,8 +89,8 @@ void round_robin(Processo processos[], int num_processos, int quantum, int troca
 
 int main() {
     Processo processos[] = {
-        {1, 10, 10, -1, 0, 1},  
-        {2, 10, 10, -1, 0, 3}   
+        {1, 10, 10, -1, 0, 3},  
+        {2, 10, 10, -1, 0, 1}   
     };
 
     int num_processos = sizeof(processos) / sizeof(processos[0]);
