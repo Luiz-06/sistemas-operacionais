@@ -30,9 +30,11 @@ int verificar_e_adicionar_troca_contexto(Processo fila[], int fila_inicio, int f
 
 void round_robin(Processo processos[], int num_processos, int quantum, int troca_contexto) {
     int tempo_vida[num_processos];
+    int tempo_espera[num_processos];
 
     for (int i = 0; i < num_processos; i++) {
         tempo_vida[i] = 0; 
+        tempo_espera[i] = 0; 
     }
 
     int tempo_total = 0;
@@ -66,8 +68,11 @@ void round_robin(Processo processos[], int num_processos, int quantum, int troca
             processo->tempo_termino = tempo_total;
 
             tempo_vida[processo->id - 1] = processo->tempo_termino - processo->tempo_chegada;
+            tempo_espera[processo->id - 1] = tempo_vida[processo->id - 1] - processo->tempo_execucao;
 
-            printf("T_vida(t%d): %d\n", processo->id, tempo_vida[processo->id - 1]);
+            printf("\nT_vida(t%d): %d\n", processo->id, tempo_vida[processo->id - 1]);
+            printf("T_espera(t%d): %d\n", processo->id, tempo_espera[processo->id - 1]);
+            printf("__________________________________________________");
 
             tempo_total += verificar_e_adicionar_troca_contexto(processos, fila_inicio, fila_fim, tempo_total, troca_contexto);
             
@@ -76,15 +81,19 @@ void round_robin(Processo processos[], int num_processos, int quantum, int troca
         }
     }
 
-    int somatorio = 0;
+    int somatorio_espera = 0;
+    int somatorio_vida = 0;
 
-    for (int i = 0; i < num_processos; i ++) {
-        somatorio += tempo_vida[i];
+    for (int i = 0; i < num_processos; i++) {
+        somatorio_espera += tempo_espera[i];
+        somatorio_vida += tempo_vida[i];
     }
 
-    int tempoMedioDeVida = somatorio / num_processos;
+    int tempoMedioDeVida = somatorio_vida / num_processos;
+    int tempoMedioDeEspera = somatorio_espera / num_processos;
 
-    printf("\nTm_vida: %d\n", tempoMedioDeVida);
+    printf("\nTm_espera: %d\n", tempoMedioDeEspera);
+    printf("Tm_vida: %d\n", tempoMedioDeVida);
     printf("Tempo total: %d\n", tempo_total);
 }
 
