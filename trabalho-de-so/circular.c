@@ -64,10 +64,8 @@ void round_robin(Processo processos[], int num_processos, int quantum, int troca
         }
     }
 
-    /*
-    printf("Tempo total: %d\n", tempo_total);
+    printf("Tempo total: %d\n", tempo_total - troca_contexto);
     printf("Total de trocas de contexto: %d\n", total_trocas);
-    */
     
     int soma_tempo_vida = 0;
     /*int soma_tempo_espera = 0;*/
