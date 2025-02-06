@@ -6,8 +6,20 @@ typedef struct Processo {
     int tempo_restante;
     int tempo_inicio;
     int tempo_termino;
-    int tempo_chegada;  
+    int tempo_chegada;
 } Processo;
+
+void ordenar_por_chegada(Processo processos[], int num_processos) {
+    for (int i = 0; i < num_processos - 1; i++) {
+        for (int j = i + 1; j < num_processos; j++) {
+            if (processos[i].tempo_chegada > processos[j].tempo_chegada) {
+                Processo temp = processos[i];
+                processos[i] = processos[j];
+                processos[j] = temp;
+            }
+        }
+    }
+}
 
 void round_robin(Processo processos[], int num_processos, int quantum, int troca_contexto) {
     Processo fila[num_processos]; 
@@ -41,22 +53,19 @@ void round_robin(Processo processos[], int num_processos, int quantum, int troca
         if (processo->tempo_restante > quantum) {
             tempo_total += quantum;
             processo->tempo_restante -= quantum;
-            /*tempo_execucao[processo->id - 1] += quantum;*/ 
             fila_inicio++;
             fila[fila_fim++] = *processo;
             tempo_total += troca_contexto;
             total_trocas++;
         } else {
             tempo_total += processo->tempo_restante;
-            /*processo->tempo_execucao = tempo_total - processo->tempo_chegada;*/
             processo->tempo_restante = 0;
             processo->tempo_termino = tempo_total;
 
             tempo_vida[processo->id - 1] = processo->tempo_termino - processo->tempo_chegada;
-            /*tempo_espera[processo->id - 1] = tempo_execucao[processo->id - 1] - processo->tempo_chegada;*/
 
             printf("Processo %d terminou | Tempo de vida: %d | Tempo de espera: ??\n",
-                processo->id, tempo_vida[processo->id - 1]/*tempo_espera[processo->id - 1]*/);
+                processo->id, tempo_vida[processo->id - 1]);
 
             fila_inicio++;
             tempo_total += troca_contexto;
@@ -68,29 +77,27 @@ void round_robin(Processo processos[], int num_processos, int quantum, int troca
     printf("Total de trocas de contexto: %d\n", total_trocas);
     
     int soma_tempo_vida = 0;
-    /*int soma_tempo_espera = 0;*/
 
     for (int i = 0; i < num_processos; i++) {
         soma_tempo_vida += tempo_vida[i];
-        /*soma_tempo_espera += tempo_espera[i];*/
     }
 
     float tempo_medio_vida = (float)soma_tempo_vida / num_processos;
-    /*float tempo_medio_espera = (float)soma_tempo_espera / num_processos;*/
 
     printf("Tempo médio de vida: %.2f\n", tempo_medio_vida);
-    /*printf("Tempo médio de espera: %.2f\n", tempo_medio_espera);*/
 }
 
 int main() {
     Processo processos[] = {
-        {1, 10, 10, -1, 0, 1},  
-        {2, 10, 10, -1, 0, 3}   
+        {1, 10, 10, -1, 0, 3},  
+        {2, 10, 10, -1, 0, 1}   
     };
 
     int num_processos = sizeof(processos) / sizeof(processos[0]);
     int quantum = 5;
     int troca_contexto = 4;
+
+    ordenar_por_chegada(processos, num_processos);
 
     round_robin(processos, num_processos, quantum, troca_contexto);
 
